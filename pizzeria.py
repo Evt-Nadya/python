@@ -1,61 +1,87 @@
-d = {}
-d['name'] = input("Введите имя: ")
-d['password'] = input("Введите пароль: ")
-print("Наше меню")
-f = open('пиццы.txt')
-print(f.read())
-f.close()
-f = open('напитки.txt')
-print(f.read())
-f.close()
-f = open('закуски.txt')
-print(f.read())
-f.close()
-if d['name'] == 'Администратор' and d['password'] == 'admin':
-    print("Хотите расширить меню? Да/Нет")
-    choice = input()
-    if choice == 'Да':
-        print("Пицца/Напиток/Закуска")
-        choice = input()
-        if choice == 'Пицца':
-            pizza = input("Добавить пиццу: ")
-            f = open("пиццы.txt", 'a')
-            f.write('\n' + pizza)
-            f.close()
-        if choice == 'Напиток':
-            drink = input("Добавить напиток: ")
-            f = open("напитки.txt", 'a')
-            f.write('\n' + drink)
-            f.close()
-        if choice == 'Закуска':
-            snack = input("Добавить закуску: ")
-            f = open("закуски.txt", 'a')
-            f.write('\n' + snack)
-            f.close()
-if d['name'] == 'Пользователь' and d['password'] == 'user':
-    name = input("Введите ваше имя: ")
-    order = input("Введите ваш заказ: ")
-    f = open(name, 'w')
-    f.write(order)
+LOGIN_ADMIN = "admin"
+PASSWORD_ADMIN = "admin"
+PIZZES = {}
+DRINKS = {}
+SNACKS = {}
+MENU = [PIZZES, DRINKS, SNACKS]
+
+
+def isAdmin(login, password):
+    return login == LOGIN_ADMIN and password == PASSWORD_ADMIN
+
+
+def auth():
+    login = input("login: ")
+    password = input("password: ")
+    return {'login': login, 'password': password}
+
+
+def getMenu():
+    print('Our menu')
+    f = open('pizza.txt')
+    print(f.read())
     f.close()
-    f = open("пиццы.txt")
-    text = f.read()
+    f = open('drink.txt')
+    print(f.read())
     f.close()
-    c = text.count(order)
-    while c > 0:
-        print(order)
-        c -= 1
-    f = open("напитки.txt")
-    text = f.read()
+    f = open('snack.txt')
+    print(f.read())
     f.close()
-    c = text.count(order)
-    while c > 0:
-        print(order)
-        c -= 1
-    f = open("закуски.txt")
-    text = f.read()
+
+
+def adminInterface():
+    getMenu()
+    while True:
+        add = input('what you want to add? pizza/drink/snack/nothing\n')
+        fileName = add
+        if add == 'pizza':
+            edit(PIZZES, fileName)
+        elif add == 'drink':
+            edit(DRINKS, fileName)
+        elif add == 'snack':
+            edit(SNACKS, fileName)
+        elif add == 'nothing':
+            break
+        else:
+            print('ERROR')
+            raise ProcessLookupError
+
+
+def edit(field, fileName):
+    dish = input("new dish: ")
+    cost = input("input cost: ")
+    field[dish] = int(cost)
+    f = open(fileName + '.txt', 'a')
+    f.write('\n'+dish +' '+ cost)
     f.close()
-    c = text.count(order)
-    while c > 0:
-        print(order)
-        c -= 1
+
+
+def simpleUserInterface():
+    count = 0
+    getMenu()
+    while True:
+        order = input('What is your choise? ')
+        if order in PIZZES: count += PIZZES[order]
+        if order in DRINKS: count += DRINKS[order]
+        if order in SNACKS: count += SNACKS[order]
+
+        order = input('Do you want order more? yes/no ')
+        if order == 'yes':
+            continue
+        elif order == 'no':
+            break
+        else:
+            print('ERROR')
+            raise ProcessLookupError
+    print('Your lunch cost: %d rubles' % count)
+    return count
+
+
+if __name__ == "__main__":
+    userList = auth()
+    if isAdmin(userList['login'], userList['password']):
+        adminInterface()
+    else:
+        simpleUserInterface()
+
+print('come again')
